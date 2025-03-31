@@ -11,6 +11,8 @@ from scipy.linalg import solve_toeplitz, toeplitz
 # Block decomposition
 # -----------------------------------------------------------------------------
 
+
+
 def blocks_decomposition(x, w, R = 0.5):
 
     """
@@ -34,9 +36,17 @@ def blocks_decomposition(x, w, R = 0.5):
       - blocks is a list of the audio segments before the windowing
       - windowed_blocks is a list the audio segments after windowing
     """
-    
-    # A COMPLETER
-    return 0
+    pas = int(len(w) * (1 - R))
+    blocks = []
+    windowed_blocks = []
+
+    for i in range(0, len(x) - len(w) + 1, pas):
+        block = x[i:i+len(w)]
+        windowed_block = block * w
+        blocks.append(block)
+        windowed_blocks.append(windowed_block)
+
+    return np.array(blocks), np.array(windowed_blocks)
     
       
 def blocks_reconstruction(blocks, w, signal_size, R = 0.5):
@@ -64,8 +74,15 @@ def blocks_reconstruction(blocks, w, signal_size, R = 0.5):
       reconstructed signal
     """
 
-    # A COMPLETER
-    return 0
+    pas = int(len(w) * (1 - R))
+    signal_reconstruit = np.zeros(signal_size)
+    nombre_segments = len(blocks)
+
+    for i in range(nombre_segments):
+        indice_debut = i * pas
+        signal_reconstruit[indice_debut:indice_debut+len(w)] += blocks[i]
+
+    return signal_reconstruit
     
 # -----------------------------------------------------------------------------
 # Linear Predictive coding
@@ -85,8 +102,8 @@ def autocovariance(x, k):
       covariance index
     """
     
-    # A COMPLETER
-    return 0
+    N = len(x)
+    return np.dot(x[:N-k], x[k:]) / N
         
     
 def lpc_encode(x, p):
@@ -114,10 +131,23 @@ def lpc_encode(x, p):
       prediction: numpy array
         lpc prediction
     """
-    
-    # A COMPLETER
-    return 0
-    
+    N = len(x)
+    r = np.array([autocovariance(x, k) for k in range(p+1)])
+
+    # Construction de la matrice Toeplitz
+    r_mat = np.zeros((p, p))
+    for i in range(p):
+        for j in range(p):
+            r_mat[i, j] = r[abs(i - j)]
+
+    r_vect = r[1:p+1]
+    coefficients = np.linalg.solve(r_mat, r_vect)
+    prediction = np.zeros_like(x)
+
+    for n in range(p, N):
+        prediction[n] = np.dot(coefficients, x[n-p:n][::-1])
+
+    return coefficients, prediction
      
 def lpc_decode(coefs, source):
 
@@ -140,8 +170,18 @@ def lpc_decode(coefs, source):
       synthesized segment
     """
     
-    # A COMPLETER
-    return 0
+    p = len(coefs)
+    N = len(source)
+    reconstructed_signal = np.zeros(N)
+
+    for n in range(N):
+        if n < p:
+            reconstructed_signal[n] = source[n]
+        else:
+            reconstructed_signal[n] = source[n] + np.dot(coefs, reconstructed_signal[n-p:n][::-1])
+
+    return reconstructed_signal
+
     
 
 def estimate_pitch(signal, sample_rate, min_freq=50, max_freq=200, threshold=1):
@@ -173,5 +213,19 @@ def estimate_pitch(signal, sample_rate, min_freq=50, max_freq=200, threshold=1):
       estimated pitch (in Hz)
     """
 
-    # A COMPLETER
-    return 0
+    correlation = np.correlate(signal, signal, mode='full')
+    correlation = correlation[correlation.size // 2:]
+    correlation /= np.max(correlation)
+
+    pics = np.where(correlation > threshold)[0]
+    if len(pics) == 0:
+        return False, 0
+
+    first_peak = pics[0]
+    pitch_period = first_peak / sample_rate
+    pitch = 1 / pitch_period
+
+    if min_freq <= pitch <= max_freq:
+        return True, pitch
+    else:
+        return False, 0
