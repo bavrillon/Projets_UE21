@@ -9,7 +9,10 @@ if __name__ == '__main__':
     # 1: Normalize and resample the signal at 8kHz
     # -------------------------------------------------------
     
-    sampling_rate, speech = wavfile.read('./audio/speech.wav')
+    file_path = os.path.join(os.path.dirname(__file__), "audio", "speech.wav") #Correction d'un pb rencontré pour accéder au fichier .wav
+    # file_path = './audio/speech.wav' si on ne rencontrait pas ce pb
+
+    sampling_rate, speech = wavfile.read(file_path)
     
     # Normalization
     speech = np.array(speech)
@@ -22,7 +25,11 @@ if __name__ == '__main__':
     sampling_rate = target_sampling_rate
     
     # Save resampled signal
-    wavfile.write("./results/speech_resampled.wav", sampling_rate, speech)
+
+    file_path_2 = os.path.join(os.path.dirname(__file__), "results", "speech_resampled.wav") #Même pb
+    # file_path_2 = "./results/speech_resampled.wav" si on ne rencontrait pas ce pb
+
+    wavfile.write(file_path_2, sampling_rate, speech)
 
     # -------------------------------------------------------
     # 2: Block decomposition of the signal
