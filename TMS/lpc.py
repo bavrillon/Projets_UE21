@@ -80,7 +80,7 @@ def blocks_reconstruction(blocks, w, signal_size, R = 0.5):
 
     for i in range(nombre_segments):
         indice_debut = i * pas
-        signal_reconstruit[indice_debut:indice_debut+len(w)] += blocks[i]
+        signal_reconstruit[indice_debut:indice_debut+len(w)] = np.where(w != 0, blocks[i] / w, 0) 
 
     return signal_reconstruit
     

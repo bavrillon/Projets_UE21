@@ -3,6 +3,8 @@ import scipy.io.wavfile as wavfile
 from scipy.signal import resample
 from lpc import *
 
+import os #Nécessaire pour contrer les pbs rencontrés
+
 if __name__ == '__main__':
 
     # -------------------------------------------------------
@@ -41,8 +43,12 @@ if __name__ == '__main__':
     n_blocks, block_size = blocks.shape
     
     # Check if the reconstruction of the signal is correct
+  
+    file_path_3 = os.path.join(os.path.dirname(__file__), "results", "block_reconstruction.wav") #Même pb
+    # file_path_3 = "./results/block_reconstruction.wav" si on ne rencontrait pas ce pb
+
     rec = blocks_reconstruction(windowed_blocks, w, speech.size, R = 0.5) 
-    wavfile.write("./results/block_reconstruction.wav", sampling_rate, rec)   
+    wavfile.write(file_path_3, sampling_rate, rec)   
      
     # -------------------------------------------------------
     # 3: Encodes the signal block by block
@@ -75,10 +81,12 @@ if __name__ == '__main__':
         blocks_decoded.append(block_decoded)
 
     blocks_decoded = np.array(blocks_decoded)
-    decoded_speech = blocks_reconstruction(blocks_decoded, w, speech.size, 
-      R = 0.5)
+    decoded_speech = blocks_reconstruction(blocks_decoded, w, speech.size, R = 0.5)
       
-    wavfile.write("./results/decoded_speech.wav", sampling_rate, decoded_speech)
+    file_path_4 = os.path.join(os.path.dirname(__file__), "results", "decoded_speech.wav") #Même pb
+    # file_path_4 = "./results/decoded_speech.wav" si on ne rencontrait pas ce pb  
+
+    wavfile.write(file_path_4, sampling_rate, decoded_speech)
     
     # -------------------------------------------------------
     # 5: Decodes each block based upon white noise
@@ -94,9 +102,11 @@ if __name__ == '__main__':
     blocks_decoded = np.array(blocks_decoded)
     decoded_speech = blocks_reconstruction(blocks_decoded, w, speech.size, 
       R = 0.5)
-      
-    wavfile.write("./results/decoded_speech_noise.wav", sampling_rate, 
-     decoded_speech)
+    
+    file_path_5 = os.path.join(os.path.dirname(__file__), "results", "decoded_speech_noise.wav") #Même pb
+    # file_path_5 = "./results/decoded_speech_noise.wav" si on ne rencontrait pas ce pb  
+  
+    wavfile.write(file_path_5, sampling_rate, decoded_speech)
     
     # -----------------------------------------------------------
     # 6: Decodes each block based upon the pitch (Bonus Question)
@@ -124,5 +134,7 @@ if __name__ == '__main__':
     decoded_speech = blocks_reconstruction(blocks_decoded, w, speech.size, 
       R = 0.5)
       
-    wavfile.write("./results/decoded_speech_pitch.wav", sampling_rate, 
-     decoded_speech)
+    file_path_6 = os.path.join(os.path.dirname(__file__), "results", "decoded_speech_pitch.wav") #Même pb
+    # file_path_6 = "./results/decoded_speech_pitch.wav" si on ne rencontrait pas ce pb  
+      
+    wavfile.write(file_path_6, sampling_rate, decoded_speech)
