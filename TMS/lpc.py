@@ -36,16 +36,18 @@ def blocks_decomposition(x, w, R = 0.5):
       - blocks is a list of the audio segments before the windowing
       - windowed_blocks is a list the audio segments after windowing
     """
-    pas = int(len(w) * (1 - R))
-    blocks = []
-    windowed_blocks = []
+    length_block = int(len(w)*(1-R))   #Taille d'un bloc
 
-    for i in range(0, len(x) - len(w) + 1, pas):
-        block = x[i:i+len(w)]
-        windowed_block = block * w
+    x_padded = np.pad(x, (len(w)//2,len(w)//2),'constant',constant_values=(0,0))  #Padding du signal
+    
+    blocks,windowed_blocks = [],[]
+    offset = 0  #Position du point gauche de la fenêtre, que l'on applique sur x_padded
+
+    while offset <= x.size :
+        block = x_padded[offset:offset + len(w)]
         blocks.append(block)
-        windowed_blocks.append(windowed_block)
-
+        windowed_blocks.append(block*w)
+        offset += length_block
     return np.array(blocks), np.array(windowed_blocks)
     
       
@@ -73,16 +75,21 @@ def blocks_reconstruction(blocks, w, signal_size, R = 0.5):
     out: numpy array
       reconstructed signal
     """
+    length_block = int(len(w)*(1-R))   #Taille d'un bloc
+    n_blocks = len(blocks)
 
-    pas = int(len(w) * (1 - R))
-    signal_reconstruit = np.zeros(signal_size)
-    nombre_segments = len(blocks)
+    reconstruction = np.zeros(signal_size + len(w))
+    norm = np.zeros_like(reconstruction)
+    offset = 0
+    for block in blocks :
+        reconstruction[offset:offset + len(w)] += block * w
+        norm[offset:offset + len(w)] += w*w
+        offset += length_block
+    reconstruction = reconstruction[len(w)//2:-len(w)//2]
+    norm = norm[len(w)//2:-len(w)//2]
 
-    for i in range(nombre_segments):
-        indice_debut = i * pas
-        signal_reconstruit[indice_debut:indice_debut+len(w)] = np.where(w != 0, blocks[i] / w, 0) 
+    return reconstruction/norm
 
-    return signal_reconstruit
     
 # -----------------------------------------------------------------------------
 # Linear Predictive coding
@@ -134,16 +141,11 @@ def lpc_encode(x, p):
     N = len(x)
     r = np.array([autocovariance(x, k) for k in range(p+1)])
 
-    # Construction de la matrice Toeplitz
-    r_mat = np.zeros((p, p))
-    for i in range(p):
-        for j in range(p):
-            r_mat[i, j] = r[abs(i - j)]
-
-    r_vect = r[1:p+1]
-    coefficients = np.linalg.solve(r_mat, r_vect)
+    first_row = r[0:p]  # 1e ligne = 1e colonne de matrice Toeplitz qui est symétrique
+    b = r[1:p+1]
+    coefficients = solve_toeplitz(first_row, b)
+    
     prediction = np.zeros_like(x)
-
     for n in range(p, N):
         prediction[n] = np.dot(coefficients, x[n-p:n][::-1])
 
@@ -213,19 +215,16 @@ def estimate_pitch(signal, sample_rate, min_freq=50, max_freq=200, threshold=1):
       estimated pitch (in Hz)
     """
 
-    correlation = np.correlate(signal, signal, mode='full')
-    correlation = correlation[correlation.size // 2:]
-    correlation /= np.max(correlation)
+    correlation_full = np.correlate(signal, signal, mode='full')
+    correlation = correlation_full[len(correlation_full)//2:]       #L'autocorrélation d'un signal est symétrique autour de zéro
+    indice_max,value_max = np.argmax(correlation),np.max(correlation)
+    pitch = sample_rate/indice_max
 
-    pics = np.where(correlation > threshold)[0]
-    if len(pics) == 0:
-        return False, 0
+    n_min = sample_rate // max_freq
+    n_max = sample_rate // min_freq
+    pitch_period = np.argmax(correlation[n_min:n_max]) + n_min            #On s'intérèsse seulement au temps succeptibles de donner des fréquences audibles
+    pitch = sample_rate/pitch_period
 
-    first_peak = pics[0]
-    pitch_period = first_peak / sample_rate
-    pitch = 1 / pitch_period
+    voiced = (value_max >= threshold)
 
-    if min_freq <= pitch <= max_freq:
-        return True, pitch
-    else:
-        return False, 0
+    return voiced,pitch
