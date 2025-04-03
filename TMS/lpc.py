@@ -79,8 +79,8 @@ def blocks_reconstruction(blocks, w, signal_size, R = 0.5):
     nombre_segments = len(blocks)
 
     for i in range(nombre_segments):
-        indice_debut = i * pas
-        signal_reconstruit[indice_debut:indice_debut+len(w)] += blocks[i]
+        u_d = i * pas
+        signal_reconstruit[u_d:u_d+len(w)] = blocks[i] /w
 
     return signal_reconstruit
     
