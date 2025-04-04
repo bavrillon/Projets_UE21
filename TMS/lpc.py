@@ -216,15 +216,17 @@ def estimate_pitch(signal, sample_rate, min_freq=50, max_freq=200, threshold=1):
     """
 
     correlation_full = np.correlate(signal, signal, mode='full')
-    correlation = correlation_full[len(correlation_full)//2:]       #L'autocorrélation d'un signal est symétrique autour de zéro
+    correlation = correlation_full[len(correlation_full)//2:]       # L'autocorrélation d'un signal est symétrique autour de zéro
     indice_max,value_max = np.argmax(correlation),np.max(correlation)
     pitch = sample_rate/indice_max
 
     n_min = sample_rate // max_freq
     n_max = sample_rate // min_freq
-    pitch_period = np.argmax(correlation[n_min:n_max]) + n_min            #On s'intérèsse seulement au temps succeptibles de donner des fréquences audibles
-    pitch = sample_rate/pitch_period
+    n_pitch_period = np.argmax(correlation[n_min:n_max]) + n_min    # On s'intérèsse seulement au temps succeptibles de donner des 
+                                                                    # fréquences audibles
+    value_pitch = np.max(correlation[n_min:n_max])
+    pitch = n_pitch_period/sample_rate
 
-    voiced = (value_max >= threshold)
+    voiced = (value_pitch >= threshold)
 
     return voiced,pitch
