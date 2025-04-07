@@ -75,16 +75,6 @@ def blocks_reconstruction(blocks, w, signal_size, R = 0.5):
     out: numpy array
       reconstructed signal
     """
-
-    pas = int(len(w) * (1 - R))
-    signal_reconstruit = np.zeros(signal_size)
-    nombre_segments = len(blocks)
-
-    for i in range(nombre_segments):
-        u_d = i * pas
-        signal_reconstruit[u_d:u_d+len(w)] = blocks[i] /w
-
-    return signal_reconstruit
     length_block = int(len(w)*(1-R))   #Taille d'un bloc
     n_blocks = len(blocks)
 
