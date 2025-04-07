@@ -100,8 +100,7 @@ if __name__ == '__main__':
         blocks_decoded.append(block_decoded)
 
     blocks_decoded = np.array(blocks_decoded)
-    decoded_speech = blocks_reconstruction(blocks_decoded, w, speech.size, 
-      R = 0.5)
+    decoded_speech = blocks_reconstruction(blocks_decoded, w, speech.size, R = 0.5)
     
     file_path_5 = os.path.join(os.path.dirname(__file__), "results", "decoded_speech_noise.wav") #Même pb
     # file_path_5 = "./results/decoded_speech_noise.wav" si on ne rencontrait pas ce pb  
