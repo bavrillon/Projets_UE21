@@ -110,7 +110,7 @@ def autocovariance(x, k):
     """
     
     N = len(x)
-    return np.dot(x[:N-k], x[k:]) / N
+    return np.dot(x[:N-k-1], x[k:-1]) / N
         
     
 def lpc_encode(x, p):
