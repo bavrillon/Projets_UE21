@@ -212,7 +212,7 @@ def estimate_pitch(signal, sample_rate, min_freq=50, max_freq=200, threshold=1):
     voiced: boolean
       Indicates if the signal is voiced (True) or not
     pitch: float
-      estimated pitch (in Hz)
+      estimated pitch (in s)
     """
 
     correlation_full = np.correlate(signal, signal, mode='full')

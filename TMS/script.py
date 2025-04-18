@@ -49,7 +49,15 @@ if __name__ == '__main__':
 
     rec = blocks_reconstruction(windowed_blocks, w, speech.size, R = 0.5) 
     wavfile.write(file_path_3, sampling_rate, rec)   
-     
+    
+    # On vérifie la bonne reconstruction du signal :
+
+    def distance_au_signal_initial(signal):
+        vect = signal - speech
+        return np.sqrt((vect**2).sum())
+
+    print('Distance du signal reconstruit à celui initial : ', distance_au_signal_initial(rec))
+
     # -------------------------------------------------------
     # 3: Encodes the signal block by block
     # -------------------------------------------------------
@@ -106,6 +114,8 @@ if __name__ == '__main__':
     # file_path_5 = "./results/decoded_speech_noise.wav" si on ne rencontrait pas ce pb  
   
     wavfile.write(file_path_5, sampling_rate, decoded_speech)
+
+    print('Distance du signal décodé à celui initial (noise) : ', distance_au_signal_initial(decoded_speech))
     
     # -----------------------------------------------------------
     # 6: Decodes each block based upon the pitch (Bonus Question)
@@ -137,3 +147,5 @@ if __name__ == '__main__':
     # file_path_6 = "./results/decoded_speech_pitch.wav" si on ne rencontrait pas ce pb  
       
     wavfile.write(file_path_6, sampling_rate, decoded_speech)
+
+    print('Distance du signal décodé à celui initial (pitch) : ', distance_au_signal_initial(decoded_speech))
