@@ -7,6 +7,10 @@ import os #Nécessaire pour contrer les pbs rencontrés
 
 if __name__ == '__main__':
 
+    folder_path = os.path.join(os.path.dirname(__file__), "results")
+    if not os.path.exists(folder_path):
+        os.mkdir(folder_path)
+
     # -------------------------------------------------------
     # 1: Normalize and resample the signal at 8kHz
     # -------------------------------------------------------
