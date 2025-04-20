@@ -7,7 +7,8 @@ import os #Nécessaire pour contrer les pbs rencontrés
 
 if __name__ == '__main__':
 
-    folder_path = os.path.join(os.path.dirname(__file__), "results")
+    folder_path = os.path.join(os.path.dirname(__file__), "results") #Correction d'un pb rencontré pour accéder au fichier .wav
+    # file_path = "results" si on ne rencontrait pas ce pb
     if not os.path.exists(folder_path):
         os.mkdir(folder_path)
 
@@ -15,7 +16,7 @@ if __name__ == '__main__':
     # 1: Normalize and resample the signal at 8kHz
     # -------------------------------------------------------
     
-    file_path = os.path.join(os.path.dirname(__file__), "audio", "speech.wav") #Correction d'un pb rencontré pour accéder au fichier .wav
+    file_path = os.path.join(os.path.dirname(__file__), "audio", "speech.wav") #Même pb
     # file_path = './audio/speech.wav' si on ne rencontrait pas ce pb
 
     sampling_rate, speech = wavfile.read(file_path)
@@ -60,7 +61,7 @@ if __name__ == '__main__':
         vect = signal - speech
         return np.sqrt((vect**2).sum())
 
-    print('Distance du signal reconstruit à celui initial : ', distance_au_signal_initial(rec))
+    print('Distance du signal reconstruit à celui initial (block reconstruction) : ', distance_au_signal_initial(rec))
 
     # -------------------------------------------------------
     # 3: Encodes the signal block by block
